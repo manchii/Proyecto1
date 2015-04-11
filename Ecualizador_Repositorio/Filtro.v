@@ -46,7 +46,7 @@ begin
 	end
 end
 
-assign sum_uk_a1fk1_a2fk2 = uk + a1*fk1 + a2*fk2;
+assign sum_uk_a1fk1_a2fk2 = uk - a1*fk1 - a2*fk2;
 assign sum_b0fk_b1fk1_b2fk2 = b0*sum_uk_a1fk1_a2fk2 + b1*fk1 + b2*fk2;
 
 endmodule

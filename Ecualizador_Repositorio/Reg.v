@@ -5,7 +5,7 @@
 //
 // Create Date: april/2015
 // Design Name:
-// Module Name: Receive_ADC
+// Module Name: Register
 // Project Name:
 // Target Devices:
 // Tool versions:
@@ -18,38 +18,30 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-module Receive_adc(
-	input wire sclk, rst,
-	input wire cs,
-	input wire sdata, rx_en,
-	output wire rx_done_tick,
-	output wire [11:0] dout
+module Reg#(
+	parameter Width = 16
+)
+( 
+	input wire clk,rst,enable,
+	input wire [Width-1:0] A,
+	output wire [Width-1:0] Y
 );
 
-reg [11:0] reg_desp, reg_desp_next;
- 
-always@(negedge sclk, posedge rst)
-begin
+reg [Width-1:0] Data, Data_next;
+
+always@(posedge clk, posedge rst)
 	if(rst)
-		reg_desp <= 12'b0;
+		Data <= {Width{1'b0}};
 	else
-		reg_desp <= reg_desp_next;
-end
+		Data <= Data_next;
 
 always@*
 begin
-	reg_desp_next = 12'b0;
-	if(rx_en)
-	begin
-		reg_desp_next = reg_desp;
-		if(~cs)
-		begin
-			reg_desp_next = {reg_desp[10:0],sdata};
-		end
-	end
+	Data_next = Data;
+	if(enable)
+		Data_next = A;
 end
 
-assign dout = reg_desp;
-assign rx_done_tick = rx_en & cs;
+assign Y = Data;
 
 endmodule
