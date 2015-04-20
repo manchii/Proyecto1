@@ -18,12 +18,16 @@ y = zeros(1,n);
 #		b0z^2 + b1z + b2
 #H(z)	=	----------------
 #		 z^2 + a1z + a2
-
+terminomax=0;
+printf('Iteracion	Valor\n');
 for i =1:1:n
 	f = u(i) -a1*fNMenos1 -a2*fNMenos2;
-	y (i) = b0* f + b1*fNMenos1 +b2*fNMenos2 ;
+	terminomax=max([a1*fNMenos1,a2*fNMenos2,terminomax]);
+	y (i) = b0* f + b1*fNMenos1 +b2*fNMenos2;
+	terminomax=max([b0* f, b1*fNMenos1,b2*fNMenos2, terminomax]);
+	printf('%d	%d\n',i ,terminomax);
 	fNMenos2 = fNMenos1;
 	fNMenos1 = f;
 endfor
-
+disp(terminomax);
 end
