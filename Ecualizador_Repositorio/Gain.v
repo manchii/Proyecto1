@@ -5,7 +5,7 @@
 //
 // Create Date: april/2015
 // Design Name:
-// Module Name: Register
+// Module Name: Gain
 // Project Name:
 // Target Devices:
 // Tool versions:
@@ -18,30 +18,21 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-module Reg#(
-	parameter Width = 16 //Largo de palabra
+module Gain#(
+	parameter p=4,
+	parameter f=13,
+	parameter Width = 1+p+f
 )
 ( 
-	input wire clk,rst,enable,//clk,rst,habilitación
-	input wire [Width-1:0] A, //Entrada
-	output wire [Width-1:0] Y //Salida
+	input wire [Width-1:0] yk,
+	input wire [Width-1:0] gain_set,
+	output wire [Width-1:0] ykgain
 );
 
-reg [Width-1:0] Data, Data_next;
-
-always@(posedge clk, posedge rst)
-	if(rst)
-		Data <= {Width{1'b0}};//rst
-	else
-		Data <= Data_next;
-
-always@*
-begin
-	Data_next = Data;//hold
-	if(enable)
-		Data_next = A;//load
-end
-
-assign Y = Data;
+Mult #(.f(f),.p(p)) mult_fk1a1(
+    .A(yk), 
+    .B(gain_set), 
+    .Y(ykgain)
+    );
 
 endmodule

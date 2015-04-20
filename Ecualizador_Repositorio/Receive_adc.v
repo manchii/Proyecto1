@@ -20,14 +20,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 module Receive_adc(
 	input wire sclk, rst,
-	input wire cs,
 	input wire sdata, rx_en,
 	output wire rx_done_tick,
-	output wire [11:0] dout
+	output wire [11:0] dout,
+	output reg cs
 );
 
 reg [11:0] reg_desp, reg_desp_next;
- 
+
+
+//Registro serial
+//Begin
 always@(negedge sclk, posedge rst)
 begin
 	if(rst)
@@ -38,18 +41,54 @@ end
 
 always@*
 begin
-	reg_desp_next = 12'b0;
-	if(rx_en)
-	begin
-		reg_desp_next = reg_desp;
-		if(~cs)
-		begin
-			reg_desp_next = {reg_desp[10:0],sdata};
-		end
-	end
+	reg_desp_next = reg_desp;
+	if(desp_enable)
+		reg_desp_next = {reg_desp[10:0],sdata};
 end
 
+
+//End
+
+reg state,state_next;
+wire desp_enable;
+reg [3:0] counter, counter_next;
+
+always@(posedge sclk, posedge rst)
+	if(rst)
+	begin
+		state <= 1'b0;
+		counter <= 4'b0;
+	end
+	else
+	begin
+		state <= state_next;
+		counter <=counter_next;
+	end
+
+always@*
+begin
+	state_next = state;
+	counter_next = 4'b0;
+	cs = 1'b0;
+	case(state)
+		1'b0:
+			begin
+				cs = 1'b1;
+				state_next=1'b1;
+			end
+		1'b1:
+			begin
+				counter_next = counter + 1'b1;
+				if(counter==4'd15)
+				begin
+					state_next = 1'b0;
+				end
+			end
+	endcase		
+end
+
+assign desp_enable = state;
+assign rx_done_tick = ~state & rx_en;
 assign dout = reg_desp;
-assign rx_done_tick = rx_en & cs;
 
 endmodule

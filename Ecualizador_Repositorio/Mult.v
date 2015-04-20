@@ -19,9 +19,9 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module Mult#(
-	parameter Width = 16,//El ancho de bits
 	parameter f = 10, // Parte decimal
-	parameter p = 5 //Parte entera
+	parameter p = 5, //Parte entera
+	parameter Width = f+p+1//El ancho de bits
 )
 ( 
 	//Operandos
@@ -36,15 +36,15 @@ module Mult#(
 	//Condición de overflow
 	wire overflow, underflow;
 	assign overflow = 	(A=={Width{1'b0}} | B=={Width{1'b0}})? 1'b0: //Caso con cero
-				(A[Width-1]==B[Width-1]) ? (|mult[2*Width-3:(2*f)+p+1]) //Signo positivo
+				(A[Width-1]==B[Width-1]) ? (|mult[2*Width-1:(2*f)+p]) //Signo positivo
 				: 1'b0 ;				//Overflow si no hay extensión de signo en el 2do bloque de magnitud
 	assign underflow = 	(A=={Width{1'b0}} | B=={Width{1'b0}})? 1'b0 : //Caso con cero
-				(A[Width-1]!=B[Width-1]) ? ~(&mult[2*Width-3:2*f+p+1]) : //Signo negativo
+				(A[Width-1]!=B[Width-1]) ? ~(&mult[2*Width-1:2*f+p]) : //Signo negativo
 				1'b0 ;					//Underflow si no hay extensión de signo en el 2do bloque de magnitud
 
 	always@*
 		Y = 	overflow 	? {1'b0,{(Width-1){1'b1}}} : //Si hay overflow se satura el resultado en 0111...
 			underflow 	? {1'b1,{(Width-1){1'b0}}} : //Si hay underflow se satura el resultado en 1000...
-			{mult[2*Width-1],mult[p+2*f-1:2*f-1]};	   //en caso contrario se deja el mismo resultado de la multiplicación binaria
+			{mult[2*Width-1],mult[p+2*f-1:f]};	   //en caso contrario se deja el mismo resultado de la multiplicación binaria
 
 endmodule

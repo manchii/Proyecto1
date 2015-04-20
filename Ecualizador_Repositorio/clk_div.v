@@ -19,13 +19,13 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module clk_div(
-	input wire clk, rst, 
-//	output wire fall_edge_cs, fall_edge_sclk,
-	output wire cs,sclk
+	input wire clk, rst,
+	output wire sclk
 );
 
 reg[7:0] counter_sclk, counter_sclk_next;
-reg[4:0] counter_cs, counter_cs_next;
+wire pulse_sclk;
+
 
 always@(posedge clk, posedge rst)
 begin
@@ -36,21 +36,15 @@ begin
 
 end
 
-always@(posedge sclk, posedge rst)
-begin
-	if(rst)
-		counter_cs <= 5'b0;
-	else
-		counter_cs <= counter_cs_next;
-end
-
 always@*
 begin
-	counter_sclk_next = (counter_sclk==8'd132)? 8'b0 : counter_sclk + 1'b1;
-	counter_cs_next = (counter_cs==5'd16)? 5'b0 : counter_cs + 1'b1;
+	counter_sclk_next = (pulse_sclk)? 8'b0 : counter_sclk + 1'b1;
 end
 
-assign cs = (counter_cs==5'd16);
-assign sclk = (counter_sclk==8'd132);
-
+/*BUFG BUFG_sclk (
+  .O(sclk), // 1-bit output: Clock buffer output
+  .I(pulse_sclk)  // 1-bit input: Clock buffer input
+);*/
+assign pulse_sclk = (counter_sclk==8'd132);
+assign sclk = pulse_sclk;
 endmodule

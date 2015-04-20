@@ -18,35 +18,102 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-module Filtro(
-	input wire clk, rst,
-	input wire signed [17:0] uk,
-	input wire signed [17:0] a1, a2, b0, b1, b2,
-	output reg signed [17:0] yk
+module Filtro#(
+	parameter p=4,
+	parameter f=13,
+	parameter Width = 1+p+f
+)
+(
+	input wire sclk, rst,enable,
+	input wire signed [Width-1:0] uk,
+	input wire signed [Width-1:0] a1, a2, b0, b1, b2,
+	output wire signed [Width-1:0] yk
 );
-reg signed [17:0] fk1,fk1_next;
-reg signed [17:0] fk2,fk2_next;
-wire signed [17:0] sum_uk_a1fk1_a2fk2; //fk
-wire signed [17:0] sum_b0fk_b1fk1_b2fk2;
 
-always@(posedge clk, posedge rst)
-begin
-	if(rst)
-	begin
-		yk <= 18'b0;
-		fk1 <= 18'b0;
-		fk2 <= 18'b0;
-	end
+wire signed [Width-1:0] fk1,fk2;
+wire signed [Width-1:0] fk,fkb0;
+wire signed [Width-1:0] fk1a1,fk2a2;
+wire signed [Width-1:0] fk1b1,fk2b2;
+wire signed [Width-1:0] sum_fk1a1_fk2a2;
+wire signed [Width-1:0] sum_fk1b1_fk2b2;
 
-	else
-	begin
-		yk <= sum_b0fk_b1fk1_b2fk2;
-		fk1 <= sum_uk_a1fk1_a2fk2;
-		fk2 <= fk1;
-	end
-end
 
-assign sum_uk_a1fk1_a2fk2 = uk - a1*fk1 - a2*fk2;
-assign sum_b0fk_b1fk1_b2fk2 = b0*sum_uk_a1fk1_a2fk2 + b1*fk1 + b2*fk2;
+//Sumas
+
+Sum #(.Width(Width)) Sum_fk(
+    .A(uk), 
+    .B(sum_fk1a1_fk2a2), 
+    .Y(fk)
+    );
+
+Sum #(.Width(Width)) Sum_fk1a1_fk2a2(
+    .A(fk1a1), 
+    .B(fk2a2), 
+    .Y(sum_fk1a1_fk2a2)
+    );
+
+Sum #(.Width(Width)) Sum_yk(
+    .A(fkb0), 
+    .B(sum_fk1b1_fk2b2), 
+    .Y(yk)
+    );
+
+Sum #(.Width(Width)) Sum_fk1b1_fk2b2(
+    .A(fk1b1), 
+    .B(fk2b2), 
+    .Y(sum_fk1b1_fk2b2)
+    );
+
+
+//Multiplicación
+
+Mult #(.f(f),.p(p)) mult_fk1a1(
+    .A(a1), 
+    .B(fk1), 
+    .Y(fk1a1)
+    );
+
+Mult #(.f(f),.p(p)) mult_fk2a2 (
+    .A(a2), 
+    .B(fk2), 
+    .Y(fk2a2)
+    );
+
+Mult #(.f(f),.p(p)) mult_fkb0 (
+    .A(b0), 
+    .B(fk), 
+    .Y(fkb0)
+    );
+
+Mult #(.f(f),.p(p)) mult_fk1b1 (
+    .A(b1), 
+    .B(fk1), 
+    .Y(fk1b1)
+    );
+
+Mult  #(.f(f),.p(p)) mult_fk2b2 (
+    .A(b2), 
+    .B(fk2), 
+    .Y(fk2b2)
+    );
+
+//Registros
+
+Reg #(.Width(Width)) reg_fk1 (
+	.A(fk),
+	.Y(fk1),
+	.clk(sclk),
+	.rst(rst),
+	.enable(enable)
+	);
+
+Reg #(.Width(Width)) reg_fk2(
+	.A(fk1),
+	.Y(fk2),
+	.clk(sclk),
+	.rst(rst),
+	.enable(enable)
+	);
+
 
 endmodule
