@@ -7,7 +7,7 @@
 ## Created: April 2015
 ## Version: 0.1
 
-T=(0:22.6757:226757);%Muestreo a 1/44.1kHz
+T=(0:22.6757:2267.57);%Muestreo a 1/44.1kHz
 
 Step=ones(1,length(T));%Señal de estímulo u(t)
 
@@ -25,7 +25,7 @@ subplot(3,1,3), plot(T(1:500),y_HighPass(1:500));
 fid= fopen('Step.txt', 'w');
 
 for  i=1:length(signal)
-    fprintf (fid, '%s \n', dec2pf(Step(i),14,18,1));
+   fprintf (fid, '%s \n', dec2pf(Step(i),14,18,1));
 endfor
 
 fclose(fid);
