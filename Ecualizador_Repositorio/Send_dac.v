@@ -5,7 +5,7 @@
 //
 // Create Date: april/2015
 // Design Name:
-// Module Name: Gain
+// Module Name: Send_dac
 // Project Name:
 // Target Devices:
 // Tool versions:
@@ -18,21 +18,34 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-module Gain#(
-	parameter p=4,
-	parameter f=13,
-	parameter Width = 1+p+f
-)
-( 
-	input wire [Width-1:0] yk,
-	input wire [1:0] gain_set,
-	output wire [Width-1:0] ykgain
+module Send_dac(
+	input wire sclk, rst,
+	input wire [11:0] data,
+	input wire desp_enable,
+	output wire sdata
 );
 
-Mult #(.f(f),.p(p)) mult_fk1a1(
-    .A(yk), 
-    .B({{p{1'b0}},gain_set,{(f-1){1'b0}}}), 
-    .Y(ykgain)
-    );
+reg [15:0] reg_desp, reg_desp_next;
+
+
+//Registro serial-paralelo
+always@(negedge sclk, posedge rst)
+begin
+	if(rst)
+		reg_desp <= 16'b0;
+	else
+		reg_desp <= reg_desp_next;
+end
+
+always@*
+begin
+	reg_desp_next = {{4{1'b0}},data};
+	if(desp_enable)
+		reg_desp_next = {reg_desp[14:0],sdata};
+end
+
+assign sdata = reg_desp[15];
+
+
 
 endmodule

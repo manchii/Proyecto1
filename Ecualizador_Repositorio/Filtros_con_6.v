@@ -5,7 +5,7 @@
 //
 // Create Date: april/2015
 // Design Name:
-// Module Name: 
+// Module Name: Filtros_con_6
 // Project Name:
 // Target Devices:
 // Tool versions:
@@ -18,7 +18,7 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-module Top #(
+module Filtros_con_6 #(
 	parameter p=8,
 	parameter f=14,
 	parameter Width = p+f+1
@@ -130,3 +130,4 @@ Filtro #(
 	); 
 
 endmodule
+

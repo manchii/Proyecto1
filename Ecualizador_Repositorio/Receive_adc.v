@@ -23,13 +23,14 @@ module Receive_adc(
 	input wire sdata, rx_en,
 	output wire rx_done_tick,
 	output wire [11:0] dout,
-	output reg cs
+	output reg cs,
+	output wire desp_enable
 );
 
 reg [11:0] reg_desp, reg_desp_next;
 
 
-//Registro serial
+//Registro serial-paralelo
 //Begin
 always@(negedge sclk, posedge rst)
 begin
@@ -50,7 +51,7 @@ end
 //End
 
 reg state,state_next;
-wire desp_enable;
+//wire desp_enable;
 reg [3:0] counter, counter_next;
 
 always@(posedge sclk, posedge rst)
