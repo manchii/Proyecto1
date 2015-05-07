@@ -28,7 +28,7 @@ module top #(
 	input wire sdata_adc,
 	input wire ps2d,ps2c,
 	output wire sdata_dac,
-	output wire cs,sclk_adc,sclk_dac
+	output wire cs,sclk
 );
 
 wire [1:0] gain1,gain2,gain3;
@@ -36,10 +36,7 @@ wire enable;
 wire [11:0] data_adc;
 wire desp_enable;
 wire [Width-1:0] data_dac;
-wire sclk;
 
-assign sclk_adc = sclk;
-assign sclk_dac = sclk;
 
 clk_div clk_div_modulo(
 	.clk(clk), 

@@ -22,13 +22,13 @@ module Sum#(
 	parameter Width = 16 //El ancho de bits
 )
 ( 
-	//input wire clk,rst,
 	//Operandos
 	input wire signed [Width-1:0] A, 
 	input wire signed [Width-1:0] B,
 	//Resultado
 	output reg signed [Width-1:0] Y
 );
+	wire signed [Width-1:0] sum;
 	//Señales de overflow
 	wire overflow, underflow;
 		//A y B positivos y el resultado negativo
@@ -36,14 +36,13 @@ module Sum#(
 		//A y B negativos y el resultado positivo 
 	assign underflow = (A[Width-1])&(B[Width-1])&(~sum[Width-1]); 
 	//Suma binaria
-	wire signed [Width-1:0] sum;
 	assign sum = A+B;
-	
+
 
 always@*
 begin
-		Y <= 	overflow 	? {1'b0,{(Width-1){1'b1}}} : //Si hay overflow se satura el resultado en 0111...
-			underflow 	? {1'b1,{(Width-1){1'b0}}} : //Si hay underflow se satura el resultado en 1000...
-			sum;					     //en caso contrario se deja el mismo resultado de la suma binaria
+	Y = 	overflow 	? {1'b0,{(Width-1){1'b1}}} : //Si hay overflow se satura el resultado en 0111...
+		underflow 	? {1'b1,{(Width-1){1'b0}}} : //Si hay underflow se satura el resultado en 1000...
+		sum;					     //en caso contrario se deja el mismo resultado de la suma binaria
 end
 endmodule
