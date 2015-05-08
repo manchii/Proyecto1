@@ -24,8 +24,9 @@ module Top_adc(
 	input wire clk,rst, //clk de 100MHz, rst
 	input wire sdata, //Puerto serial del ADC
 	input wire rx_en, //Habilitación de carga
-	output wire cs,	//Puerto habilitación de toma de datos
-	output wire sclk, //clk dato serial
+	output wire cs,sync,	//Puerto habilitación de toma de datos
+	output wire sclk_adc, sclk_dac,	//clk dato serial
+	output wire sdata_dac,
 	//display del 7segmentos
 	output wire [6:0] Catodo,
 	output wire [3:0] Seleccion
@@ -34,6 +35,13 @@ module Top_adc(
 wire rx_done_tick,clk_disp;
 wire [11:0] dout,dato_capt;
 wire [6:0] disp1,disp2,disp3;
+wire desp_enable;
+wire sclk;
+
+assign sclk_adc = sclk;
+assign sclk_dac = sclk;
+assign sync = cs;
+
 //Recepción de datos
 Receive_adc Receive_adc_module (
     .sclk(sclk), 
@@ -42,7 +50,8 @@ Receive_adc Receive_adc_module (
     .rx_en(rx_en), 
     .rx_done_tick(rx_done_tick), 
     .dout(dout), 
-    .cs(cs)
+    .cs(cs),
+	 .desp_enable(desp_enable)
     );
 //Generador del clock serial
 clk_div clk_div_module (
@@ -50,6 +59,14 @@ clk_div clk_div_module (
     .rst(rst), 
     .sclk(sclk)
     );
+
+Send_dac modulo_envio(
+	.sclk(sclk), 
+	.rst(rst),
+	.data(dato_capt),
+	.desp_enable(desp_enable),
+	.sdata(sdata_dac)
+);
 
 //Registro de captura
 Reg #(.Width(12)) Reg_module (
@@ -91,7 +108,7 @@ Driver_7seg Driver_7seg_module (
     .Disp1(disp1), 
     .Disp2(disp2), 
     .Disp3(disp3), 
-    .Disp4(7'hff), 
+    .Disp4(7'h0), 
     .Catodo(Catodo), 
     .Seleccion(Seleccion)
     );

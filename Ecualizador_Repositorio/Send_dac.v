@@ -29,7 +29,7 @@ reg [15:0] reg_desp, reg_desp_next;
 
 
 //Registro serial-paralelo
-always@(negedge sclk, posedge rst)
+always@(posedge sclk, posedge rst)
 begin
 	if(rst)
 		reg_desp <= 16'b0;
